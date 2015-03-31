@@ -1,0 +1,5 @@
+#surefire
+#Mon Mar 30 23:29:50 MDT 2015
+user.dir=/home/jzheaux/dev/git/keyinsights/SDA/web
+localRepository=/home/jzheaux/.m2/repository
+basedir=/home/jzheaux/dev/git/keyinsights/SDA/web

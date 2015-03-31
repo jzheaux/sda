@@ -1,0 +1,4 @@
+utils/Reader.class
+userInterface/UserInterfaceOutput.class
+biz/keyinsights/sda/web/config/AppConfig.class
+userInterface/ClientUserInterface.class

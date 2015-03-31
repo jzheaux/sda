@@ -1,0 +1,28 @@
+package message.restful;
+
+import java.util.ArrayList;
+import java.util.List;
+import org.junit.Test;
+import regression.CacheKeys;
+import regression.Regression;
+import regression.User;
+import utils.message.client.MessageDispatcher;
+
+public class TestPost {
+
+    @Test
+    public void testMessagePost() {
+        User u = new User();
+        u.setIp("192.168.1.100");
+        u.setPort(8080);
+        List<User> list = new ArrayList<User>();
+        list.add(u);
+        User u2 = new User();
+        u2.setIp("192.168.1.100");
+        u2.setPort(8081);
+        list.add(u2);
+        Regression.putCacheContent(CacheKeys.CURRENT_USER, u2);
+        Regression.putCacheContent(CacheKeys.DATA_SOURCE_USER, list);
+        MessageDispatcher.sendDataSourceUserInformation();
+    }
+}
