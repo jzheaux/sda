@@ -13,13 +13,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import session.web.GeneralInstructionSessionBean;
 import utils.message.GeneralInstructionMessage;
 
 @Path("/generalInstruction")
-@Service
+@Component
 public class HandleGeneralInstruction {
 
     @Context

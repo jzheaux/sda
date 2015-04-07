@@ -12,7 +12,7 @@ public class MyWebApplicationInitializer implements WebApplicationInitializer {
 
 	public void onStartup(ServletContext servletContext)
 			throws ServletException {
-		servletContext.addListener(new ContextLoaderListener(createWebAppContext()));        
+		servletContext.addListener(new ContextLoaderListener(createWebAppContext()));    
 	}
 
     private WebApplicationContext createWebAppContext() {

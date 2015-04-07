@@ -25,7 +25,7 @@ public class Regression {
         Object o = cache.get(key);
         while (o == null) {
             try {
-                Thread.sleep(1);
+                Thread.sleep(100);
             } catch (InterruptedException ex) {
                 Logger.getLogger(Regression.class.getName()).log(Level.SEVERE, null, ex);
             }

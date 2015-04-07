@@ -1,15 +1,21 @@
 package utils.message.client;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
-import cryptosystem.PaillierPublicKey;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 import matrix.BigIntMatrix;
 import matrix.DoubleMatrix;
+
+import org.glassfish.jersey.client.ClientResponse;
+
 import protocol.ProtocolParameters;
 import regression.CacheKeys;
 import regression.Regression;
@@ -23,14 +29,15 @@ import utils.message.MessagePing;
 import utils.message.MessageProtocolParameters;
 import utils.message.MessagePublicKey;
 import utils.message.MessageRegressionType;
+import cryptosystem.PaillierPublicKey;
 
 public class MessageDispatcher {
 
     public static int pingUser(User user) {
         MessagePing message = new MessagePing();
-        Client c = Client.create();
-        WebResource r = c.resource(UrlGenerator.generateUrl(user, UrlGenerator.PING));
-        ClientResponse response = r.type(MediaType.APPLICATION_XML).post(ClientResponse.class, message);
+        Client c = ClientBuilder.newClient();
+        WebTarget r = c.target(UrlGenerator.generateUrl(user, UrlGenerator.PING));
+        Response response = r.request().post(Entity.xml(message));
         return response.getStatus();
     }
 
@@ -40,9 +47,9 @@ public class MessageDispatcher {
         message.setUserList(userList);
         for (User u : userList) {
             if (!Regression.isCurrentUser(u)) {
-                Client c = Client.create();
-                WebResource r = c.resource(UrlGenerator.generateUrl(u, UrlGenerator.DATA_SOURCE_USER_INFORMATION));
-                ClientResponse response = r.accept(MediaType.APPLICATION_XML).put(ClientResponse.class, message);
+                Client c = ClientBuilder.newClient();
+                WebTarget r = c.target(UrlGenerator.generateUrl(u, UrlGenerator.DATA_SOURCE_USER_INFORMATION));
+                Response response = r.request().put(Entity.xml(message));//ClientResponse.class, message);
             }
         }
     }
@@ -50,9 +57,9 @@ public class MessageDispatcher {
     public static int sendPublicKey(PaillierPublicKey publicKey, User toUser) {
         MessagePublicKey message = new MessagePublicKey();
         message.setPublicKey(publicKey);
-        Client c = Client.create();
-        WebResource r = c.resource(UrlGenerator.generateUrl(toUser, UrlGenerator.PUBLIC_KEY));
-        ClientResponse response = r.type(MediaType.APPLICATION_XML).post(ClientResponse.class, message);
+        Client c = ClientBuilder.newClient();
+        WebTarget r = c.target(UrlGenerator.generateUrl(toUser, UrlGenerator.PUBLIC_KEY));
+        Response response = r.request().post(Entity.xml(message));
         return response.getStatus();
     }
 
@@ -62,9 +69,9 @@ public class MessageDispatcher {
         List<User> userList = (List<User>) Regression.getCacheContent(CacheKeys.DATA_SOURCE_USER);
         for (User u : userList) {
             if (!Regression.isCurrentUser(u)) {
-                Client c = Client.create();
-                WebResource r = c.resource(UrlGenerator.generateUrl(u, UrlGenerator.REGRESSION_TYPE));
-                r.type(MediaType.APPLICATION_XML).post(ClientResponse.class, message);
+                Client c = ClientBuilder.newClient();
+                WebTarget r = c.target(UrlGenerator.generateUrl(u, UrlGenerator.REGRESSION_TYPE));
+                r.request().post(Entity.xml(message));
             }
         }
 
@@ -73,9 +80,9 @@ public class MessageDispatcher {
     public static int sendProtocolParameters(ProtocolParameters parameters, User toUser) {
         MessageProtocolParameters message = new MessageProtocolParameters();
         message.setParameters(parameters);
-        Client c = Client.create();
-        WebResource r = c.resource(UrlGenerator.generateUrl(toUser, UrlGenerator.PROTOCOL_PARAMETERS));
-        ClientResponse response = r.type(MediaType.APPLICATION_XML).post(ClientResponse.class, message);
+        Client c = ClientBuilder.newClient();
+        WebTarget r = c.target(UrlGenerator.generateUrl(toUser, UrlGenerator.PROTOCOL_PARAMETERS));
+        Response response = r.request().post(Entity.xml(message));
         return response.getStatus();
     }
 
@@ -110,25 +117,25 @@ public class MessageDispatcher {
     }
 
     public static int sendDoubleMatrix(MessageDoubleMatrix message, User toUser) {
-        Client c = Client.create();
-        WebResource r = c.resource(UrlGenerator.generateUrl(toUser, UrlGenerator.DOUBLE_MATRIX));
-        ClientResponse response = r.type(MediaType.APPLICATION_XML).post(ClientResponse.class, message);
+        Client c = ClientBuilder.newClient();
+        WebTarget r = c.target(UrlGenerator.generateUrl(toUser, UrlGenerator.DOUBLE_MATRIX));
+        Response response = r.request().post(Entity.xml(message));
         return response.getStatus();
     }
 
     public static int sendBigIntMatrix(MessageBigIntMatrix message, User toUser) {
         System.out.println("Sending BigIntMatrix, matrix id:" + message.getMatrixId() + ", protocol: " + message.getProtocolInformation() + " , to " + toUser.toString());
-        Client c = Client.create();
-        WebResource r = c.resource(UrlGenerator.generateUrl(toUser, UrlGenerator.BIG_INT_MATRIX));
-        ClientResponse response = r.type(MediaType.APPLICATION_XML).post(ClientResponse.class, message);
+        Client c = ClientBuilder.newClient();
+        WebTarget r = c.target(UrlGenerator.generateUrl(toUser, UrlGenerator.BIG_INT_MATRIX));
+        Response response = r.request().post(Entity.xml(message));
         return response.getStatus();
     }
 
     public static int sendGeneralInstruction(GeneralInstructionMessage message, User toUser) {
         System.out.println("Sending General Instruction, protocol: " + message.getProtocolInformation() + " , to " + toUser.toString());
-        Client c = Client.create();
-        WebResource r = c.resource(UrlGenerator.generateUrl(toUser, UrlGenerator.GENERAL_INSTRUCTION));
-        ClientResponse response = r.type(MediaType.APPLICATION_XML).post(ClientResponse.class, message);
+        Client c = ClientBuilder.newClient();
+        WebTarget r = c.target(UrlGenerator.generateUrl(toUser, UrlGenerator.GENERAL_INSTRUCTION));
+        Response response = r.request().post(Entity.xml(message));
         return response.getStatus();
     }
 
@@ -140,9 +147,9 @@ public class MessageDispatcher {
         message.setProtocolStepNumber(stepNumber);
         message.setOppShareCacheKey(oppShareCasheKey);
         message.setResultCasheKey(resultCacheKey);
-        Client c = Client.create();
-        WebResource r = c.resource(UrlGenerator.generateUrl(toUser, UrlGenerator.BIG_INTEGER));
-        ClientResponse response = r.type(MediaType.APPLICATION_XML).post(ClientResponse.class, message);
+        Client c = ClientBuilder.newClient();
+        WebTarget r = c.target(UrlGenerator.generateUrl(toUser, UrlGenerator.BIG_INTEGER));
+        Response response = r.request().post(Entity.xml(message));
         return response.getStatus();
     }
 
@@ -155,9 +162,9 @@ public class MessageDispatcher {
         message.setOppShareCacheKey(oppShareCasheKey);
         message.setResultCasheKey(resultCacheKey);
         message.setAdditionalInfo(additionalInfo);
-        Client c = Client.create();
-        WebResource r = c.resource(UrlGenerator.generateUrl(toUser, UrlGenerator.BIG_INTEGER));
-        ClientResponse response = r.type(MediaType.APPLICATION_XML).post(ClientResponse.class, message);
+        Client c = ClientBuilder.newClient();
+        WebTarget r = c.target(UrlGenerator.generateUrl(toUser, UrlGenerator.BIG_INTEGER));
+        Response response = r.request().post(Entity.xml(message));
         return response.getStatus();
     }
 }

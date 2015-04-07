@@ -1,6 +1,7 @@
 package session.client;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -27,6 +28,7 @@ public class UserInterface implements UserInterfaceRemote {
         creator.setIp(ip);
         creator.setConnected(connected);
         Regression.putCacheContent(CacheKeys.CREATOR, creator);
+        addDataSourceUser(ip, port, connected);
     }
 
     public void setCurrentUser(String ip, int port, boolean connected) {

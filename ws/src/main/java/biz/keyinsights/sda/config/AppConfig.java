@@ -10,7 +10,7 @@ import org.springframework.remoting.rmi.RmiServiceExporter;
 import session.client.UserInterfaceRemote;
 
 @Configuration
-@ComponentScan({"session.web", "session.web.handlers", "session.client"})
+@ComponentScan({"session.web", "session.web.handlers", "session.client", "message.rest"})
 public class AppConfig {
 	@Inject UserInterfaceRemote service;
 	

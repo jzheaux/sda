@@ -13,13 +13,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import session.web.DoubleMatrixSessionBean;
 import utils.message.MessageDoubleMatrix;
 
 @Path("/doubleMatrix")
-@Service
+@Component
 public class HandleDoubleMatrix {
     @Context
     UriInfo uriInfo;

@@ -13,13 +13,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import session.web.RegressionTypeSessionBean;
 import utils.message.MessageRegressionType;
 
 @Path("/regressionType")
-@Service
+@Component
 public class HandleRegressionType {
     @Context
     UriInfo uriInfo;

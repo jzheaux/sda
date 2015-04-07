@@ -11,13 +11,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import session.web.DataSourceUserSessionBean;
 import utils.message.MessageDataSourceUsers;
 
 @Path("/dataSourceUserInformation")
-@Service
+@Component
 public class HandleDataSourceUserInformation {
 
     @Context

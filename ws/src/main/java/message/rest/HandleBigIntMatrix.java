@@ -13,13 +13,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import session.web.BigIntMatrixSessionBean;
 import utils.message.MessageBigIntMatrix;
 
 @Path("/bigIntMatrix")
-@Service
+@Component
 public class HandleBigIntMatrix {
 
     @Context

@@ -1,12 +1,16 @@
 package message.restful;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.api.client.WebResource;
 import java.util.ArrayList;
 import java.util.List;
-import javax.ws.rs.core.MediaType;
+
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.Response;
+
 import org.junit.Test;
+
 import regression.User;
 import utils.message.MessagePing;
 
@@ -42,12 +46,12 @@ public class TestJson {
         userList.add(u);
         MessagePing message = new MessagePing();
         message.setCurrentUser(u);
-        Client c = Client.create();
-        WebResource r = c.resource("http://localhost:8080/SDASystem-war/rest/ping");
-        ClientResponse response = r.accept(MediaType.APPLICATION_XML)
-                .post(ClientResponse.class, message);
+        Client c = ClientBuilder.newClient();
+		WebTarget r = c.target("http://localhost:8080/sda-ws/rest/ping");
+        Response response = r.request()
+                .post(Entity.xml(message));
         System.out.println(response.getStatus());
         System.out.println(response);
-        System.out.println(response.getEntity(String.class));
+        System.out.println(response.readEntity(String.class));
     }
 }

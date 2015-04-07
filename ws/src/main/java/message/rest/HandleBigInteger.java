@@ -13,13 +13,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import javax.xml.bind.JAXBElement;
 
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import session.web.BigIntegerSessionBean;
 import utils.message.MessageBigInteger;
 
 @Path("/bigInteger")
-@Service
+@Component
 public class HandleBigInteger {
     @Context
     UriInfo uriInfo;
