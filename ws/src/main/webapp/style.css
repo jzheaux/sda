@@ -69,3 +69,21 @@ li {
 .tables p {
   /*text-align: right;*/
 }
+
+table {
+  margin-bottom: 10px;
+}
+
+tr {
+  border-bottom: 1px solid black;
+}
+
+td, th {
+  padding: 8px 25px;
+  font-size: 1.2em;
+}
+
+dt {
+  float: left;
+  width: 225px;
+}
