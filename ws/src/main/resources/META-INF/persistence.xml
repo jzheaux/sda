@@ -3,9 +3,7 @@
 	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd"
 	version="2.0" xmlns="http://java.sun.com/xml/ns/persistence">
 	<persistence-unit name="sda" transaction-type="RESOURCE_LOCAL">
-	    <class>biz.keyinsights.sda.model.User</class>
-	    <class>biz.keyinsights.sda.model.Table</class>
-		<class>biz.keyinsights.sda.model.Regression</class>	    
+	    <class>biz.keyinsights.sda.model.User</class>	    
 
 		<properties>
 			<property name="javax.persistence.jdbc.driver" value="org.hsqldb.jdbc.JDBCDriver" />
