@@ -40,17 +40,29 @@
 </script>
 </head>
 <body data-table-id="${model.id}" data-page-context="${pageContext.request.contextPath}">
+	<jsp:include page="/WEB-INF/header.jsp"/>
 	<div class="container">
+		<c:choose>
+			<c:when test="${not empty model.id}">
+				<h1>Edit ${model.tableName}</h1>
+			</c:when>
+			<c:otherwise>
+				<h1>Create a New Table</h1>
+			</c:otherwise>
+		</c:choose>
+		
 		<form method="post" enctype="multipart/form-data">
 			<section>
 				<h1>Data</h1>
 				<dl>
-					<dt>Name:</dt>
+					<dt>Table Name:</dt>
 					<dd><input name="tableName" value="${model.tableName}"/></dd>
-					<dt>Data:</dt>
-					<dd><input type="file" name="data"/></dd>
-					<dd>
-						<c:if test="${not empty model.id}">
+					<dt>Data (.csv):</dt>
+					<dd><input type="file" name="data"/><br/></dd>
+					<c:if test="${not empty model.id}">
+						<dt>Joinable columns:</dt>
+						<dd>
+							<span class="note aside">(indicate by clicking column name)</span>
 							<table>
 								<thead>
 									<tr>
@@ -77,8 +89,9 @@
 									</tr>
 								</tbody>
 							</table>
-						</c:if>
-					</dd>
+							
+						</dd>
+					</c:if>
 				</dl>
 			</section>
 			<section>
@@ -92,7 +105,16 @@
 					<dd><input type="password" name="confirm" value="${model.password}"/></dd>
 				</dl>
 			</section>
-			<input type="submit" class="btn btn-primary" value="Submit"/>
+			
+			<c:choose>
+				<c:when test="${not empty model.id}">
+					<input type="submit" class="btn btn-primary" value="Update"/>
+				</c:when>
+				<c:otherwise>
+					<input type="submit" class="btn btn-primary" value="Create"/>
+				</c:otherwise>
+			</c:choose>
+			
 		</form>
 	</div>
 </body>

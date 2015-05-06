@@ -18,11 +18,12 @@
 <script
 	src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/style.css">
 
 <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 </head>
 <body>
+	<jsp:include page="/WEB-INF/header.jsp"/>
 	<div class="container">
 		<section id="tables">
 		<h1>Data Tables</h1>
@@ -42,7 +43,7 @@
 						<td>${table.sizeInBytes} bytes</td>
 						<td>${table.lastModifiedInDays} day(s) ago</td>
 						<td><a class="btn btn-primary" href="tables/${table.id}/edit">Edit</a>
-							<form method="post" action="tables/${table.id}/delete">
+							<form method="post" action="tables/${table.id}/delete" style="float: right">
 								<input type="submit" class="btn" value="Delete" />
 							</form></td>
 					</tr>
@@ -77,17 +78,17 @@
 					<input type="number" name="numberOfGpus"
 						value="${model.numberOfGpus}" />
 				</dd>
-				<dt>Data Directory</dt>
+				<dt>Data Directory:</dt>
 				<dd>
-					<input name="dataDirectory" value="${model.dataDirectory}" />
+					<input name="dataDirectory" value="${model.dataDirectory}" size=50/>
 				</dd>
-				<dt>Access Logs Directory</dt>
+				<dt>Access Logs Directory:</dt>
 				<dd>
 					<input name="accessLogDirectory"
-						value="${model.accessLogDirectory}" />
+						value="${model.accessLogDirectory}" size=50/>
 				</dd>
 			</dl>
-			<input class="btn btn-primary" type="submit" value="Submit" />
+			<input class="btn btn-primary" type="submit" value="Update" />
 		</form>
 		</section>
 	</div>

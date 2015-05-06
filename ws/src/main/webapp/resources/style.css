@@ -33,13 +33,16 @@ li {
 
 .table-name {
   padding: 10px;
+  white-space: normal;
+  width: 100px;
 }
 
 .table div {
-  padding: 20px;
+  padding: 10px;
   border: 1px solid black;
   border-radius: 5px;
   background: #38f;
+  min-height: 85px;
 }
 
 .column-names {
@@ -70,6 +73,10 @@ li {
   /*text-align: right;*/
 }
 
+.data tr:hover {
+	background-color: #eee;
+}
+
 table {
   margin-bottom: 10px;
 }
@@ -90,4 +97,46 @@ dt {
 
 .join {
 	background-color: #0fa;
+}
+
+header {
+  background-color: #0d7;
+  padding-left: 40px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  box-shadow: 1px 1px 5px #000;
+  margin-bottom: 20px;
+}
+
+header h1 {
+  font-size: 3em;
+  font-weight: bold;
+}
+
+header nav li {
+  display: inline;
+  padding-right: 30px;
+  font-size: 1.5em;
+}
+
+header nav {
+  text-align: right;
+}
+
+section h1 {
+  border-bottom: 1px solid black;
+  margin-bottom: 25px;
+}
+
+dt { 
+  font-size: 1.4em;
+  font-weight: normal;
+}
+
+.aside {
+	font-style: italic;
+}
+
+#settings dt {
+  width: 300px;
 }

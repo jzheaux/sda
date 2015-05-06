@@ -36,7 +36,7 @@ public class TableController {
 	public String commitAddTable(@ModelAttribute("model") @Valid Table table, @RequestParam("data") MultipartFile csv) throws IOException {
 		tableService.addTable(table, csv.getSize() == 0 ? null : csv.getInputStream());
 		
-		return "redirect:/table/" + table.getId();
+		return "redirect:/table/" + table.getId() + "/edit";
 	}
 	
 	@RequestMapping(value="/table/{id}/edit", method=RequestMethod.GET)
@@ -89,9 +89,9 @@ public class TableController {
 	}
 
 	@RequestMapping(value="/tables", method=RequestMethod.GET)
-	public ModelAndView findAllTables() {
-		List<Table> tables = tableService.findAllTables();
-		return new ModelAndView("/admin/tables", "model", tables);
+	public @ResponseBody
+	List<Table> findAllTables() {
+		return tableService.findAllTables();
 	}
 	
 	@RequestMapping(value="/analysis", method=RequestMethod.GET)
