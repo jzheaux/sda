@@ -42,8 +42,8 @@
 						<td>${table.tableName}</td>
 						<td>${table.sizeInBytes} bytes</td>
 						<td>${table.lastModifiedInDays} day(s) ago</td>
-						<td><a class="btn btn-primary" href="tables/${table.id}/edit">Edit</a>
-							<form method="post" action="tables/${table.id}/delete" style="float: right">
+						<td><a class="btn btn-primary" href="table/${table.id}/edit">Edit</a>
+							<form method="post" action="table/${table.id}/delete" style="float: right">
 								<input type="submit" class="btn" value="Delete" />
 							</form></td>
 					</tr>
