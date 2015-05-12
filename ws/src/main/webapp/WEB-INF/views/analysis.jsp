@@ -167,9 +167,9 @@ $(function() {
 				<dd><input type="text" name="host" placeholder="127.0.0.1"/></dd>
 				<dt>Port:</dt>
 				<dd><input type="text" name="port" placeholder="8080"/></dd>
-				<dt>Host:</dt>
+				<dt>Username:</dt>
 				<dd><input type="text" name="username" placeholder="Remote Username"/></dd>
-				<dt>Port:</dt>
+				<dt>Password:</dt>
 				<dd><input type="text" name="password" placeholder="Remote Password"/></dd>
 				<a href="#" id="add-remote-server" class="btn btn-primary">Add</a>			
 			</dl>
