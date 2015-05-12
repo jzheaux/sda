@@ -108,10 +108,12 @@ public class Table {
 		this.sizeInBytes = sizeInBytes;
 	}
 	
+	@JsonIgnore
 	public boolean isPasswordProtected() {
 		return password != null && password.length > 0;
 	}
 
+	@JsonIgnore
 	public boolean authorizes(String username, char[] password) {
 		if ( this.username == null ) {
 			return true;
