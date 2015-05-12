@@ -1,6 +1,7 @@
 package biz.keyinsights.sda.model;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
@@ -105,5 +106,19 @@ public class Table {
 
 	public void setSizeInBytes(Long sizeInBytes) {
 		this.sizeInBytes = sizeInBytes;
+	}
+	
+	public boolean isPasswordProtected() {
+		return password != null && password.length > 0;
+	}
+
+	public boolean authorizes(String username, char[] password) {
+		if ( this.username == null ) {
+			return true;
+		} else if ( this.password == null && this.username.equals(username) ) {
+			return true;
+		}
+		
+		return this.username.equals(username) && Arrays.equals(this.password, password);
 	}
 }

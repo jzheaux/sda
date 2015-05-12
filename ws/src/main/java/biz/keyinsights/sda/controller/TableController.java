@@ -1,6 +1,7 @@
 package biz.keyinsights.sda.controller;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -99,4 +101,10 @@ public class TableController {
 		List<Table> tables = tableService.findAllTables();
 		return new ModelAndView("/analysis", "model", tables);
 	}
+	
+	@RequestMapping(value="/table/{id}/data", method=RequestMethod.GET)
+	public InputStream readTable(@PathVariable("id") String id, @RequestHeader(value="X-Table-Username", required=false) String username, @RequestHeader(value="X-Table-Password", required=false) char[] password) {
+		return tableService.getTableData(id, username, password);
+	}
+	
 }

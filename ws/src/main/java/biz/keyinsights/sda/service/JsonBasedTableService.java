@@ -25,6 +25,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import biz.keyinsights.sda.model.AuthenticationException;
 import biz.keyinsights.sda.model.Column;
 import biz.keyinsights.sda.model.ServerConfiguration;
 import biz.keyinsights.sda.model.Table;
@@ -37,7 +38,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public class JsonBasedTableService implements TableService {
 	private static final Logger logger = LoggerFactory.getLogger(JsonBasedTableService.class);
 	
-	private static final String DATA_LOCATION = "/home/jzheaux/dev/git/keyinsights/configuration";
+	private static final String DATA_LOCATION = System.getProperty("user.home") + "/dev/git/keyinsights/configuration";
 	
 	@Inject ConfigurationService configurationService;
 	@Inject ObjectMapper objectMapper;
@@ -164,5 +165,22 @@ public class JsonBasedTableService implements TableService {
 			}
 		}
 		return results;
+	}
+
+	@Override
+	public InputStream getTableData(String id, String username, char[] password) {
+		Table t = getTable(id);
+		
+		if ( t.authorizes(username, password) ) {
+			ServerConfiguration sc = configurationService.getConfiguration(ServerConfiguration.class);
+			File data = new File(sc.getDataDirectory(), t.getTableName() + ".csv");
+			try {
+				return new FileInputStream(data);
+			} catch ( IOException e ) {
+				throw new TableException("Could not load table", e);
+			}
+		} else {
+			throw new AuthenticationException("Username or password don't match");
+		}
 	}
 }

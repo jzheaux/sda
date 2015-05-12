@@ -17,7 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Service
 public class JsonBasedConfigurationService implements ConfigurationService {
-	private static final String DATA_LOCATION = "/home/jzheaux/dev/git/keyinsights/configuration";
+	private static final String DATA_LOCATION = System.getProperty("user.home") + "/dev/git/keyinsights/configuration";
 	
 	@Inject ObjectMapper objectMapper;
 	

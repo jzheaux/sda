@@ -1,5 +1,6 @@
 package biz.keyinsights.sda.service;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -13,4 +14,5 @@ public interface TableService {
 	void updateTable(Table t, InputStream csv);
 	void deleteTable(String id);
 	List<Table> findAllTables();
+	InputStream getTableData(String id, String username, char[] password);
 }
