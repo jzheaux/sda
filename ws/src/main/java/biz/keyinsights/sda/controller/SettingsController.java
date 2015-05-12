@@ -39,4 +39,9 @@ public class SettingsController {
 		configurationService.updateConfiguration(sc);
 		return "redirect:/settings";
 	}
+	
+	@RequestMapping(value="/", method=RequestMethod.GET)
+	public String home() {
+		return "index";
+	}
 }
