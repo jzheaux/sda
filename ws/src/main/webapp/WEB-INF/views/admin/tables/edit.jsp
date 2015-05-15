@@ -51,7 +51,7 @@
 			</c:otherwise>
 		</c:choose>
 		
-		<form method="post" action="${table.id}/edit" enctype="multipart/form-data">
+		<form method="post" action="${model.id}/edit" enctype="multipart/form-data">
 			<section>
 				<h1>Data</h1>
 				<dl>
