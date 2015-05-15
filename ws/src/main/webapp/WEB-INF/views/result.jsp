@@ -4,7 +4,8 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>Home</title>
+<title>Regression Result</title>
+
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 
@@ -19,8 +20,6 @@
 </head>
 <body>
 	<jsp:include page="/WEB-INF/header.jsp"/>
-	<div class="container">
-		Welcome!
-    </div>
+	Sample Regression Result!
 </body>
 </html>

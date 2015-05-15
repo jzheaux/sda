@@ -61,10 +61,13 @@ public class RemoteTableService implements TableService {
 		return template.execute(
 				"http://" + host + ":" + port + "/sda-ws/table/{id}/data", HttpMethod.GET, 
 				(request) -> {
-					request.getHeaders().add("X-Table-Username", username);
-					request.getHeaders().add("X-Table-Password", new String(password));
+					request.getHeaders().add("Authorization", "Basic ZGVtbzplc3NkZWVheQ==");
+					if ( username != null ) {
+						request.getHeaders().add("X-Table-Username", username);
+						request.getHeaders().add("X-Table-Password", new String(password));
+					}
 				}, 
-				(response) -> response.getBody());
+				(response) -> response.getBody(), id);
 	}
 
 }

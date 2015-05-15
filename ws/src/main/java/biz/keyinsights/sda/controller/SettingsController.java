@@ -5,6 +5,7 @@ import java.util.HashMap;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,6 +22,7 @@ public class SettingsController {
 	@Inject TableService tableService;
 	
 	@RequestMapping(value="/settings")
+	@Secured("ADMIN")
 	public ModelAndView beginSettingsWorkflow(@ModelAttribute("model") ServerConfiguration sc) {
 		ServerConfiguration stored = configurationService.getConfiguration(ServerConfiguration.class);
 		sc.setAccessLogDirectory(stored.getAccessLogDirectory());
@@ -35,6 +37,7 @@ public class SettingsController {
 	}
 	
 	@RequestMapping(value="/settings", method=RequestMethod.POST)
+	@Secured("ADMIN")
 	public String commitSettingsWorkflow(@ModelAttribute("model") @Valid ServerConfiguration sc) {
 		configurationService.updateConfiguration(sc);
 		return "redirect:/settings";
@@ -43,5 +46,15 @@ public class SettingsController {
 	@RequestMapping(value="/", method=RequestMethod.GET)
 	public String home() {
 		return "index";
+	}
+	
+	@RequestMapping(value="/login", method=RequestMethod.GET)
+	public String login() {
+		return "login";
+	}
+	
+	@RequestMapping(value="/login", method=RequestMethod.POST)
+	public String postLogin() {
+		return home();
 	}
 }

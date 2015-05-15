@@ -7,6 +7,9 @@
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Perform Analysis</title>
 
+<script src="${pageContext.request.contextPath}/resources/jquery-1.10.2.js"></script>
+<script src="${pageContext.request.contextPath}/resources/jquery-ui.js"></script>
+
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 
@@ -16,9 +19,10 @@
 <!-- Latest compiled and minified JavaScript -->
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resources/jquery-ui.css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/style.css">
 
-<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+<script src="${pageContext.request.contextPath}/resources/base64.js"></script>
 
 <script type="text/javascript">
 $(function() {
@@ -43,21 +47,25 @@ $(function() {
 	
 	$("#add-remote-server").click(function() {
 		var host = $("[name='host']").val();
-		var port = $("[name='port']").val()
+		var port = $("[name='port']").val();
 		$.ajax({
 			url : "http://" + host + ":" + port + "/" + $("body").data("page-context") + "/tables",
-			data : 'username=' + $("[name='username']").val() + "&password=" + $("[name='password']").val(),
+			beforeSend: function (xhr) {
+				var encoded = Base64.encode($("[name='username']").val() + ":" + $("[name='password']").val());
+			    xhr.setRequestHeader ("Authorization", "Basic " + encoded);
+			},
 			success : function(response) {
-				
 				for ( var i = 0; i < response.length; i++ ) {
 					var table = response[i];
-					var li = "<li class='table remote'>"
+					var li = "<li data-table-id='" + table.id + "' data-table-name='" + table.tableName + "' data-host='" + host + "' data-port='" + port + "' class='table remote'>"
 						+ "<p>From " + host + "</p>"
 						+ "<div>"
 						+ "<span class='table-name'>" + table.tableName + "</span>"
 						+ "<ul class='column-names'>";
 					for ( var j = 0; j < table.columns.length; j++ ) {
-						li += "<li data-column-id='" + j + "' data-table-='" + table.id + "' data-host='" + host + "' data-port='" + port + "' data-token='tbi'>" + table.columns[j].name + "</li>\n";
+						if ( table.columns[j].joinable ) {
+							li += "<li data-column-id='" + j + "' data-token='tbi'>" + table.columns[j].name + "</li>\n";
+						}
 					}
 					li += "</ul>" + "</div>" + "</li>";
 					$(".tables").append(li);
@@ -68,73 +76,99 @@ $(function() {
 		});
 	});
 	
-	$("#begin-regression").click(beginRegression);
+	var beginRegression = function(e) {
+		authorizeRegression();
+		e.preventDefault();
+	}
 	
-	var beginRegression = function(auths) {
+	var authorizeRegression = function(auths) {
 		// show wait image during ajax call
 		var data = {};
-		data.auths = auths || {};
+		data.tables = [];
 		
-		var predictorColumns = [];
-		$(".predictor").each(function(e) {
-			var column = { table : e.data("table-id"), column : e.data("column-id") }
-			if ( e.data("host") ) {
-				column.host = e.data("host");
-				column.port = e.data("port");
+		$(".table").each(function() {
+			var tableId = $(this).data("table-id");
+			var table = { id : tableId, tableName : $(this).data("table-name") };
+			table.predictors = [];
+			table.dependents = [];
+			
+			if ( $(this).data("host") ) {
+				table.host = $(this).data("host");
+				table.port = $(this).data("port");
 			}
-			predictorColumns.push(column);
-		});
-		var dependentColumns = [];
-		$(".dependent").each(function(e) {
-			var column = { table : e.data("table-id"), column : e.data("column-id") }
-			if ( e.data("host") ) {
-				column.host = e.data("host");
-				column.port = e.data("port");
+			
+			$(this).find(".predictor").each(function() {
+				var column = { id : $(this).data("column-id") };
+				table.predictors.push(column);
+			});
+			
+			$(this).find(".dependent").each(function() {
+				var column = { id : $(this).data("column-id") };
+				table.dependents.push(column);
+			});
+			 
+			if ( auths && auths[tableId] ) {
+				table.username = auths[tableId].username;
+				table.password = auths[tableId].password;
 			}
-			dependentColumns.push(column);
-		});
-		data.predictorColumns = predictorColumns;
-		data.dependentColumns = dependentColumns;
+			
+			if ( table.predictors.length > 0 || table.dependents.length > 0 ) {
+				data.tables.push(table);
+			}
+		})
 		
 		// ask for u/p for each table, submit with regression request
 		
 		$.ajax({
 			url: $("body").data("page-context") + "/regression",
 			method : "POST",
-			type : "application/json",
-			data : data,
+			datatype : 'json',
+			contentType : 'application/json',
+			mimeType : 'application/json',
+			data : JSON.stringify(data),
 			success : function(response) {
-				location.href = $("body").data("page-context") + "/regression/" + response.id;
-			},
-			error : function(error, status, response) {
-				// turn off wait image
-				if ( status == 401 ) {
-					var content = "<h1>Further authentication required</h1>";
-					content += "<p>In order to protect the data you are about to analyze, please enter the appropriate table-specific username and password for the following tables:</p>";
+				if ( response.id ) {
+					location.href = $("body").data("page-context") + "/regression/" + response.id;
+				} else {
+					// turn off wait image
+					var content = "<div id='dialog-confirm' title='Further Authentication Required'>";
+					content += "<p><span class='ui-icon ui-icon-alert' style='float:left; margin:0 7px 20px 0;''></span>In order to protect the data you are about to analyze, please enter the appropriate table-specific username and password for the following tables:</p>";
 					content += "<ul>"
-					for ( var i = 0; i < response.auths.length; i++ ) {
-						var table = response.auths[i].table;
-						content += "<li><h2>For Access to " + table.tableName + " from " + table.host + ":" + table.port + ":</h2>";
+					for ( var i = 0; i < response.authRequests.length; i++ ) {
+						var table = response.authRequests[i];
+						content += "<li><h6>For Access to <strong>" + table.tableName + "</strong>" + ( table.host ? (" from " + table.host + ":" + table.port) : "" ) + ":</h6>";
 						content += "<dl class='auth' data-table-id='" + table.id + "' data-host='" + table.host + "' data-port='" + table.port + "'><dt>Username:</dt><dd><input class='username'/></dd>";
 						content += "<dt>Password:</dt><dd><input type='password' class='password'/></dd></dl></li>";
 					}
-					content += "</ul>"
-					content += "<input id='auths' type='submit' class='btn btn-primary' value='Authenticate'/>";
-					$.dialog(content);
-					$("#auths").click(function() {
-						$(".auth").each(function() { 
-							data.auths.push({ id : $(this).data("table-id"), host : $(this).data("host"), port : $(this).data("port")});
-						});
-						beginRegression(data.auths);
+					content += "</ul>";
+					//content += "<input id='auths' type='submit' class='btn btn-primary' value='Authenticate'/></div>";
+					$(content).dialog({resizable: false,
+						      modal: true,
+						      buttons : {
+						    	  "Authenticate" : function() {
+						    		var auths = {};
+						    		$(".auth").each(function() { 
+										auths[$(this).data("table-id")] = { username : $(this).find(".username").val(), password : $(this).find(".password").val()};
+									});
+									$(this).dialog("close");
+									authorizeRegression(auths);
+						    	  },
+						    	  "Cancel" : function() {
+									$(this).dialog( "close" );
+						    	  }
+						      }
 					});
-				} else { // show the errors
-					var content = "<h1>There was an error when running the regression:</h1>";
-					content += "<p>" + response.message + "</p>";
-					$.dialog(content);
-				}
+/* 					} else { // show the errors
+						var content = "<h1>There was an error when running the regression:</h1>";
+						content += "<p>" + response.message + "</p>";
+						$.dialog(content);
+					}
+ */				}
 			}
 		});
 	};
+	
+	$("#begin-regression").click(beginRegression);
 	
 });
 </script>
@@ -144,15 +178,16 @@ $(function() {
 	<div class="container">
 		<h1>Create a Regression</h1>
 		<section>
+			<p>Hover over each table to see the keyable columns; click the column once to mark it as a dependent variable for your regression, click twice to mark it as a predictor.</p>
 			<ul class="tables">
 				<c:forEach var="table" items="${model}">
-				<li data-password-protected="${table.passwordProtected}" class="table">
+				<li data-password-protected="${table.passwordProtected}" data-table-id="${table.id}" data-table-name="${table.tableName}" class="table">
 					<div>
 						<span class="table-name">${table.tableName}</span>
 						<ul class="column-names">
 							<c:forEach varStatus="i" var="column" items="${table.columns}">
 								<c:if test="${column.joinable}">
-									<li data-column-id="${i.index}" data-table-id="${table.id}">${column.name}</li>
+									<li data-column-id="${i.index}">${column.name}</li>
 								</c:if>
 							</c:forEach>
 						</ul>

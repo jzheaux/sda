@@ -31,6 +31,7 @@ public class MyWebApplicationInitializer implements WebApplicationInitializer {
     private WebApplicationContext createWebAppContext() {
         AnnotationConfigWebApplicationContext appContext = new AnnotationConfigWebApplicationContext();
         appContext.register(AppConfig.class);
+        appContext.register(SecurityConfig.class);
         
         return appContext;
     }

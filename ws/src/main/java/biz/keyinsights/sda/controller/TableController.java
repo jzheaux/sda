@@ -8,6 +8,11 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.validation.Valid;
 
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,13 +33,14 @@ import biz.keyinsights.sda.service.TableService;
 public class TableController {
 	@Inject TableService tableService;
 	
-	
 	@RequestMapping(value="/table/new", method=RequestMethod.GET)
+	@Secured("ADMIN")
 	public String beginAddTable(@ModelAttribute("model") Table table) {
 		return "/admin/tables/edit";
 	}
 	
 	@RequestMapping(value="/table/new", method=RequestMethod.POST)
+	@Secured("ADMIN")
 	public String commitAddTable(@ModelAttribute("model") @Valid Table table, @RequestParam("data") MultipartFile csv) throws IOException {
 		tableService.addTable(table, csv.getSize() == 0 ? null : csv.getInputStream());
 		
@@ -42,6 +48,7 @@ public class TableController {
 	}
 	
 	@RequestMapping(value="/table/{id}/edit", method=RequestMethod.GET)
+	@Secured("ADMIN")
 	public ModelAndView beginEditTable(@PathVariable("id") String id) {
 		return new ModelAndView("/admin/tables/edit", new HashMap<String, Object>() {{
 			put("model", tableService.getTable(id));
@@ -50,6 +57,7 @@ public class TableController {
 	}
 	
 	@RequestMapping(value="/table/{id}/edit", method=RequestMethod.POST)
+	@Secured("ADMIN")
 	public String commitEditTable(@PathVariable("id") String id, @ModelAttribute("model") @Valid Table table, @RequestParam("data") MultipartFile csv)  throws IOException {
 		tableService.updateTable(table, csv.getSize() == 0 ? null : csv.getInputStream());
 
@@ -57,6 +65,7 @@ public class TableController {
 	}
 
 	@RequestMapping(value="/table/{id}/joincolumn/{column}", method=RequestMethod.PUT)
+	@Secured("ADMIN")
 	public @ResponseBody 
 	String addJoinColumn(@PathVariable("id") String id, @PathVariable("column") Integer columnId) {
 		Table t = tableService.getTable(id);
@@ -67,6 +76,7 @@ public class TableController {
 	}
 	
 	@RequestMapping(value="/table/{id}/joincolumn/{column}", method=RequestMethod.DELETE)
+	@Secured("ADMIN")
 	public @ResponseBody 
 	String removeJoinColumn(@PathVariable("id") String id, @PathVariable("column") Integer columnId) {
 		Table t = tableService.getTable(id);
@@ -77,6 +87,7 @@ public class TableController {
 	}
 	
 	@RequestMapping(value="/table/{id}/data/preview")
+	@Secured("ADMIN")
 	public ModelAndView beginTablePreview(@PathVariable("id") String id) {
 		TablePreview tp = tableService.getTablePreview(id);
 
@@ -84,6 +95,7 @@ public class TableController {
 	}
 	
 	@RequestMapping(value="/table/{id}/delete", method=RequestMethod.POST)
+	@Secured("ADMIN")
 	public String commitDeleteTable(@PathVariable("id") String id) {
 		tableService.deleteTable(id);
 		
@@ -103,8 +115,14 @@ public class TableController {
 	}
 	
 	@RequestMapping(value="/table/{id}/data", method=RequestMethod.GET)
-	public InputStream readTable(@PathVariable("id") String id, @RequestHeader(value="X-Table-Username", required=false) String username, @RequestHeader(value="X-Table-Password", required=false) char[] password) {
-		return tableService.getTableData(id, username, password);
+	public ResponseEntity readTable(@PathVariable("id") String id, @RequestHeader(value="X-Table-Username", required=false) String username, @RequestHeader(value="X-Table-Password", required=false) char[] password) {
+		Table t = tableService.getTable(id);
+		InputStream is = tableService.getTableData(id, username, password);
+		
+		InputStreamResource inputStreamResource = new InputStreamResource(is);
+		HttpHeaders httpHeaders = new HttpHeaders();
+		httpHeaders.setContentLength(t.getSizeInBytes());
+		return new ResponseEntity(inputStreamResource, httpHeaders, HttpStatus.OK);
 	}
 	
 }
