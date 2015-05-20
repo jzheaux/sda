@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.util.List;
 
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -15,6 +17,8 @@ import biz.keyinsights.sda.model.Table;
 import biz.keyinsights.sda.model.TablePreview;
 
 public class RemoteTableService implements TableService {
+	private static final Logger logger = LoggerFactory.getLogger(RemoteTableService.class);
+	
 	private String host;
 	private String port;
 	
@@ -69,8 +73,11 @@ public class RemoteTableService implements TableService {
 					request.getHeaders().add("Authorization", "Basic ZGVtbzplc3NkZWVheQ==");
 					request.getHeaders().add("Host", host);
 					if ( username != null ) {
+						logger.debug("Sending table-level username and password for username " + username);
 						request.getHeaders().add("X-Table-Username", username);
 						request.getHeaders().add("X-Table-Password", new String(password));
+					} else {
+						logger.debug("Not sending table-level username and password");
 					}
 				}, 
 				(response) -> {
