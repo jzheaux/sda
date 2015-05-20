@@ -132,9 +132,8 @@ public class RegressionController {
 					}
 				});
 				
-				// the code appears to be single-threaded, and so I believe the code will block for startRegression to finish.
-				// it appears that the only way for me to see the results, though, is by calling getClinetMessage repeatedly until
-				// there is nothing more
+				// the regression code appears to be single-threaded; to keep progress from blocking, I
+				// launch a creator and joiner regression, one for the local tables and one for the remote.
 				
 				// I believe there are better designs out there that still enable you to have the non-blocking architecture you are
 				// going for, namely Promise architectures are super nice. If you are really wanting to do the progressive messaging
