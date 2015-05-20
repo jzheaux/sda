@@ -71,7 +71,8 @@ public class MessageDispatcher {
             if (!Regression.isCurrentUser(u)) {
                 Client c = ClientBuilder.newClient();
                 WebTarget r = c.target(UrlGenerator.generateUrl(u, UrlGenerator.REGRESSION_TYPE));
-                r.request().post(Entity.xml(message));
+                Response response = r.request().post(Entity.xml(message));
+                response.getStatus();
             }
         }
 

@@ -1,15 +1,14 @@
 package biz.keyinsights.sda.service;
 
-import java.io.IOException;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.web.client.ResponseExtractor;
 import org.springframework.web.client.RestTemplate;
 
 import biz.keyinsights.sda.model.Table;
@@ -53,7 +52,13 @@ public class RemoteTableService implements TableService {
 
 	@Override
 	public List<Table> findAllTables() {
-		throw new UnsupportedOperationException("Retreiving all tables remotely not yet supported.");
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Authorization", "Basic ZGVtbzplc3NkZWVheQ==");
+		HttpEntity<?> entity = new HttpEntity<>(headers);
+		return template.exchange(
+				"http://" + host + ":" + port + "/sda-ws/tables", HttpMethod.GET, 
+				entity, 
+				List.class).getBody();
 	}
 
 	@Override
@@ -62,12 +67,19 @@ public class RemoteTableService implements TableService {
 				"http://" + host + ":" + port + "/sda-ws/table/{id}/data", HttpMethod.GET, 
 				(request) -> {
 					request.getHeaders().add("Authorization", "Basic ZGVtbzplc3NkZWVheQ==");
+					request.getHeaders().add("Host", host);
 					if ( username != null ) {
 						request.getHeaders().add("X-Table-Username", username);
 						request.getHeaders().add("X-Table-Password", new String(password));
 					}
 				}, 
-				(response) -> response.getBody(), id);
+				(response) -> {
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					IOUtils.copy(response.getBody(), baos);
+					return new ByteArrayInputStream(baos.toByteArray());
+				},
+				id);
+		
 	}
 
 }

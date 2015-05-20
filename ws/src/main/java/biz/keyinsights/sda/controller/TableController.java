@@ -27,6 +27,7 @@ import org.springframework.web.servlet.ModelAndView;
 import biz.keyinsights.sda.model.Column;
 import biz.keyinsights.sda.model.Table;
 import biz.keyinsights.sda.model.TablePreview;
+import biz.keyinsights.sda.service.RemoteTableService;
 import biz.keyinsights.sda.service.TableService;
 
 @Controller
@@ -112,6 +113,13 @@ public class TableController {
 	public ModelAndView prepareAnalysis() {
 		List<Table> tables = tableService.findAllTables();
 		return new ModelAndView("/analysis", "model", tables);
+	}
+	
+	@RequestMapping(value="/proxy/{host}/{port}/tables", method=RequestMethod.GET)
+	public @ResponseBody
+	List<Table> findAllTablesByProxy(@PathVariable("host") String host, @PathVariable("port") Integer port, @RequestHeader("Authorization") String authHeader) {
+		RemoteTableService rts = new RemoteTableService(host, String.valueOf(port));
+		return rts.findAllTables();
 	}
 	
 	@RequestMapping(value="/table/{id}/data", method=RequestMethod.GET)

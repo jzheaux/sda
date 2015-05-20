@@ -41,6 +41,11 @@ $(function() {
 				$(this).addClass("locked");
 			}
 		});
+		
+		$("#begin-regression").unbind("click");
+		if ( $(".dependent").length && $(".predictor").length ) {
+			$("#begin-regression").click(beginRegression);
+		}
 	};
 	
 	$(".column-names li").click(tableActions);
@@ -48,15 +53,17 @@ $(function() {
 	$("#add-remote-server").click(function() {
 		var host = $("[name='host']").val();
 		var port = $("[name='port']").val();
+		
 		$.ajax({
-			url : "http://" + host + ":" + port + "/" + $("body").data("page-context") + "/tables",
+			url : $("body").data("page-context") + "/proxy/" + host + "/" + port + "/tables",
 			beforeSend: function (xhr) {
 				var encoded = Base64.encode($("[name='username']").val() + ":" + $("[name='password']").val());
 			    xhr.setRequestHeader ("Authorization", "Basic " + encoded);
 			},
 			success : function(response) {
-				for ( var i = 0; i < response.length; i++ ) {
-					var table = response[i];
+				var tables = response;
+				for ( var i = 0; i < tables.length; i++ ) {
+					var table = tables[i];
 					var li = "<li data-table-id='" + table.id + "' data-table-name='" + table.tableName + "' data-host='" + host + "' data-port='" + port + "' class='table remote'>"
 						+ "<p>From " + host + "</p>"
 						+ "<div>"
@@ -86,6 +93,9 @@ $(function() {
 		var data = {};
 		data.tables = [];
 		
+		var hasAtLeastOnePredictor = false;
+		var hasAtLeastOneDependent = false;
+		
 		$(".table").each(function() {
 			var tableId = $(this).data("table-id");
 			var table = { id : tableId, tableName : $(this).data("table-name") };
@@ -100,11 +110,13 @@ $(function() {
 			$(this).find(".predictor").each(function() {
 				var column = { id : $(this).data("column-id") };
 				table.predictors.push(column);
+				hasAtLeastOnePredictor = true;
 			});
 			
 			$(this).find(".dependent").each(function() {
 				var column = { id : $(this).data("column-id") };
 				table.dependents.push(column);
+				hasAtLeastOneDependent = true;
 			});
 			 
 			if ( auths && auths[tableId] ) {
@@ -117,58 +129,57 @@ $(function() {
 			}
 		})
 		
-		// ask for u/p for each table, submit with regression request
+		if ( hasAtLeastOnePredictor && hasAtLeastOneDependent ) {
+			// ask for u/p for each table, submit with regression request
+			$.ajax({
+				url: $("body").data("page-context") + "/regression",
+				method : "POST",
+				datatype : 'json',
+				contentType : 'application/json',
+				mimeType : 'application/json',
+				data : JSON.stringify(data),
+				success : function(response) {
+					if ( response.id ) {
+						console.log(response.log);
+						//location.href = $("body").data("page-context") + "/regression/" + response.id;
+					} else {
+						// turn off wait image
+						var content = "<div id='dialog-confirm' title='Further Authentication Required'>";
+						content += "<p><span class='ui-icon ui-icon-alert' style='float:left; margin:0 7px 20px 0;''></span>In order to protect the data you are about to analyze, please enter the appropriate table-specific username and password for the following tables:</p>";
+						content += "<ul>"
+						for ( var i = 0; i < response.authRequests.length; i++ ) {
+							var table = response.authRequests[i];
+							content += "<li><h6>For Access to <strong>" + table.tableName + "</strong>" + ( table.host ? (" from " + table.host + ":" + table.port) : "" ) + ":</h6>";
+							content += "<dl class='auth' data-table-id='" + table.id + "' data-host='" + table.host + "' data-port='" + table.port + "'><dt>Username:</dt><dd><input class='username'/></dd>";
+							content += "<dt>Password:</dt><dd><input type='password' class='password'/></dd></dl></li>";
+						}
+						content += "</ul>";
+						//content += "<input id='auths' type='submit' class='btn btn-primary' value='Authenticate'/></div>";
+						$(content).dialog({resizable: false,
+							      modal: true,
+							      buttons : {
+							    	  "Authenticate" : function() {
+							    		var auths = {};
+							    		$(".auth").each(function() { 
+											auths[$(this).data("table-id")] = { username : $(this).find(".username").val(), password : $(this).find(".password").val()};
+										});
+										$(this).dialog("close");
+										authorizeRegression(auths);
+							    	  },
+							    	  "Cancel" : function() {
+										$(this).dialog( "close" );
+							    	  }
+							      }
+						});
+	 				}
+				}
+			});
+		} else {
+			$("<div title='Insufficient Parameters'>You must select at least one predictor column and one dependent column to proceed.</div>").dialog({ modal : true, buttons : { "Ok" : function() { $(this).dialog("close"); }}});
+		}
+
 		
-		$.ajax({
-			url: $("body").data("page-context") + "/regression",
-			method : "POST",
-			datatype : 'json',
-			contentType : 'application/json',
-			mimeType : 'application/json',
-			data : JSON.stringify(data),
-			success : function(response) {
-				if ( response.id ) {
-					location.href = $("body").data("page-context") + "/regression/" + response.id;
-				} else {
-					// turn off wait image
-					var content = "<div id='dialog-confirm' title='Further Authentication Required'>";
-					content += "<p><span class='ui-icon ui-icon-alert' style='float:left; margin:0 7px 20px 0;''></span>In order to protect the data you are about to analyze, please enter the appropriate table-specific username and password for the following tables:</p>";
-					content += "<ul>"
-					for ( var i = 0; i < response.authRequests.length; i++ ) {
-						var table = response.authRequests[i];
-						content += "<li><h6>For Access to <strong>" + table.tableName + "</strong>" + ( table.host ? (" from " + table.host + ":" + table.port) : "" ) + ":</h6>";
-						content += "<dl class='auth' data-table-id='" + table.id + "' data-host='" + table.host + "' data-port='" + table.port + "'><dt>Username:</dt><dd><input class='username'/></dd>";
-						content += "<dt>Password:</dt><dd><input type='password' class='password'/></dd></dl></li>";
-					}
-					content += "</ul>";
-					//content += "<input id='auths' type='submit' class='btn btn-primary' value='Authenticate'/></div>";
-					$(content).dialog({resizable: false,
-						      modal: true,
-						      buttons : {
-						    	  "Authenticate" : function() {
-						    		var auths = {};
-						    		$(".auth").each(function() { 
-										auths[$(this).data("table-id")] = { username : $(this).find(".username").val(), password : $(this).find(".password").val()};
-									});
-									$(this).dialog("close");
-									authorizeRegression(auths);
-						    	  },
-						    	  "Cancel" : function() {
-									$(this).dialog( "close" );
-						    	  }
-						      }
-					});
-/* 					} else { // show the errors
-						var content = "<h1>There was an error when running the regression:</h1>";
-						content += "<p>" + response.message + "</p>";
-						$.dialog(content);
-					}
- */				}
-			}
-		});
 	};
-	
-	$("#begin-regression").click(beginRegression);
 	
 });
 </script>

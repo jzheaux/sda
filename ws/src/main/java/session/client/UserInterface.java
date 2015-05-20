@@ -1,8 +1,9 @@
 package session.client;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+
+import matrix.DoubleMatrix;
 
 import org.springframework.stereotype.Service;
 
@@ -100,6 +101,14 @@ public class UserInterface implements UserInterfaceRemote {
         Regression.setDesignMatrixDouble(matrix);
     }
 
+    public void setResponseMatrix(DoubleMatrix matrix) {
+        Regression.putCacheContent(CacheKeys.RESPONSE_MATRIX_DOUBLE, matrix);
+    }
+
+    public void setDesignMatrix(DoubleMatrix matrix) {
+    	Regression.putCacheContent(CacheKeys.DESIGN_MATRIX_DOUBLE, matrix);
+    }
+    
     public void startRegression() {
         List<User> userList = (List<User>) Regression.getCacheContent(CacheKeys.DATA_SOURCE_USER);
         User creator = (User) Regression.getCacheContent(CacheKeys.CREATOR);

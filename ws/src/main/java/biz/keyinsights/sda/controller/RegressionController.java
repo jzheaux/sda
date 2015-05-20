@@ -4,8 +4,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
+import java.util.UUID;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.stream.Collectors;
 
 import javax.inject.Inject;
+import javax.servlet.http.HttpServletRequest;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
@@ -17,8 +25,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.client.HttpClientErrorException;
 
+import regression.Regression;
+import session.client.UserInterface;
+import biz.keyinsights.regression.model.DoubleMatrixBuilder;
 import biz.keyinsights.sda.model.AuthenticationException;
 import biz.keyinsights.sda.model.RegressionRequest;
+import biz.keyinsights.sda.model.RegressionRequest.RegressionColumn;
 import biz.keyinsights.sda.model.RegressionRequest.RegressionTable;
 import biz.keyinsights.sda.model.RegressionResponse;
 import biz.keyinsights.sda.service.RemoteTableService;
@@ -27,12 +39,21 @@ import biz.keyinsights.sda.service.TableService;
 @Controller
 public class RegressionController {
 	@Inject TableService tableService;
+	@Inject UserInterface userInterface;
 	
 	@RequestMapping(value="/regression", method = RequestMethod.POST)
 	public @ResponseBody
-	RegressionResponse performRegression(@RequestBody RegressionRequest rr) throws IOException {
+	RegressionResponse performRegression(@RequestBody RegressionRequest rr, HttpServletRequest request) throws IOException {
 		RegressionResponse response = new RegressionResponse();
-		List<InputStream> dataSources = new ArrayList<InputStream>();
+		DoubleMatrixBuilder predictor = new DoubleMatrixBuilder();
+		DoubleMatrixBuilder dependent = new DoubleMatrixBuilder();
+		
+		Runnable creatorRegression = () -> {
+			userInterface.setCurrentUser(request.getServerName(), request.getServerPort(), false);
+			userInterface.startRegression();
+		};
+		
+		List<Runnable> joinerRegressions = new ArrayList<Runnable>();
 		
 		boolean hasError = false;
 		for ( RegressionTable t : rr.getTables() ) {
@@ -40,7 +61,37 @@ public class RegressionController {
 				new RemoteTableService(t.getHost(), t.getPort());
 			
 			try {
-				dataSources.add(service.getTableData(t.getId(), t.getUsername(), t.getPassword()));
+				InputStream data = service.getTableData(t.getId(), t.getUsername(), t.getPassword());
+				try ( Scanner scanner = new Scanner(data) ) {
+					/*String columnHeader =*/ scanner.nextLine();
+					int whichRow = 0;
+					while ( scanner.hasNextLine() ) {
+						String[] row = scanner.nextLine().split(",");
+						List<RegressionColumn> columns = t.getPredictors();
+						Double[] toAdd = columns.stream()
+												.map(c -> Double.parseDouble(row[c.getId()]))
+												.collect(Collectors.toList())
+												.toArray(new Double[columns.size()]);
+						predictor.addColumns(whichRow, toAdd);
+						
+						columns = t.getDependents();
+						toAdd = columns.stream()
+								.map(c -> Double.parseDouble(row[c.getId()]))
+								.collect(Collectors.toList())
+								.toArray(new Double[columns.size()]);
+						dependent.addColumns(whichRow, toAdd);
+						
+						whichRow++;
+					}
+				}
+				
+				if ( !StringUtils.isEmpty(t.getHost()) ) {
+					userInterface.addDataSourceUser(t.getHost(), Integer.parseInt(t.getPort()), false);
+					joinerRegressions.add(() -> {
+						userInterface.setCurrentUser(t.getHost(), Integer.parseInt(t.getPort()), false);;
+						userInterface.startRegression();
+					});
+				}
 			} catch ( AuthenticationException e ) {
 				response.addAuthRequest(t);
 				hasError = true;
@@ -60,7 +111,58 @@ public class RegressionController {
 		//TODO: Tuan/Prasanta: The above input streams will contain the csv data that I would suppose at
 		// this point you would use to perform your regression. It is one input stream for each table of data.
 		if ( !hasError ) {
-			response.setId("1"); // dummy value to demonstrate UI
+			try {
+				userInterface.addCreator(request.getServerName(), request.getServerPort(), true);
+				userInterface.setCurrentUser(request.getServerName(), request.getServerPort(), true);
+				userInterface.setDesignMatrix(predictor.toMatrix());
+				userInterface.setResponseMatrix(dependent.toMatrix());
+				userInterface.setRegressionType("linearRegression");
+				
+				ExecutorService service = Executors.newFixedThreadPool(joinerRegressions.size() + 2);
+				Future<?> creator = service.submit(creatorRegression);
+				
+				joinerRegressions.forEach(r -> service.submit(r));
+				
+				service.submit(() -> {
+					while ( !userInterface.checkRegressionEnd() ) {
+						String line = userInterface.getClinetMessage();
+						if ( !StringUtils.isEmpty(line) ) {
+							System.out.println("LOGGER: " + userInterface.getClinetMessage());
+						}
+					}
+				});
+				
+				// the code appears to be single-threaded, and so I believe the code will block for startRegression to finish.
+				// it appears that the only way for me to see the results, though, is by calling getClinetMessage repeatedly until
+				// there is nothing more
+				
+				// I believe there are better designs out there that still enable you to have the non-blocking architecture you are
+				// going for, namely Promise architectures are super nice. If you are really wanting to do the progressive messaging
+				// in the browser, then we could have it listen via a WebSocket. Further, since this is just a message, it isn't strongly typed
+				// and there is no way for me to predictably extract the data into a graph or something similar.
+				
+				try {
+					creator.get();
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (ExecutionException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+				while ( !Regression.clientMessage.isEmpty() ) {
+					response.log(Regression.clientMessage.poll());
+		        }
+				response.setId(UUID.randomUUID().toString()); // dummy value to demonstrate UI
+			} finally {
+				userInterface.removeDataSourceUser(request.getServerName(), request.getServerPort());
+				rr.getTables().stream().forEach((t) -> {
+					if ( !StringUtils.isEmpty(t.getHost()) ) {
+						userInterface.removeDataSourceUser(t.getHost(), Integer.parseInt(t.getPort()));
+					}
+				});
+			}
 		}
 		
 		return response;
