@@ -62,7 +62,7 @@ public class TableController {
 	public String commitEditTable(@PathVariable("id") String id, @ModelAttribute("model") @Valid Table table, @RequestParam("data") MultipartFile csv)  throws IOException {
 		tableService.updateTable(table, csv.getSize() == 0 ? null : csv.getInputStream());
 
-		return "redirect:/table/" + table.getId();
+		return "redirect:/table/" + table.getId() + "/edit";
 	}
 
 	@RequestMapping(value="/table/{id}/joincolumn/{column}", method=RequestMethod.PUT)

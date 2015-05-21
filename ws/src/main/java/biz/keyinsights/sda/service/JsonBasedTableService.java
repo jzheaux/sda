@@ -103,8 +103,6 @@ public class JsonBasedTableService implements TableService {
 						
 			if ( csv != null ) {
 				uploadData(existing, csv);	
-			} else {
-				existing.setColumns(t.getColumns());
 			}
 			
 			existing.setTableName(t.getTableName());

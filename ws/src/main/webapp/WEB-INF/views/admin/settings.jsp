@@ -48,18 +48,6 @@
 							</form></td>
 					</tr>
 				</c:forEach>
-				<!-- <tr>
-							<td>Table #2</td>
-							<td>65467 bytes</td>
-							<td>3 days ago</td>
-							<td><a class="btn btn-primary" href="tables/edit.jsp">Edit</a><a class="btn" href="#">Delete</a></td>
-						</tr>
-						<tr>
-							<td>Table #3</td>
-							<td>12342 bytes</td>
-							<td>3 days ago</td>
-							<td><a class="btn btn-primary" href="tables/edit.jsp">Edit</a><a class="btn" href="#">Delete</a></td>
-						</tr>		 -->
 			</tbody>
 		</table>
 		<a class="btn btn-primary" href="table/new">Add Data Table</a> </section>
@@ -84,8 +72,7 @@
 				</dd>
 				<dt>Access Logs Directory:</dt>
 				<dd>
-					<input name="accessLogDirectory"
-						value="${model.accessLogDirectory}" size=50/>
+					<input name="accessLogDirectory" value="${model.accessLogDirectory}" size=50/>
 				</dd>
 			</dl>
 			<input class="btn btn-primary" type="submit" value="Update" />

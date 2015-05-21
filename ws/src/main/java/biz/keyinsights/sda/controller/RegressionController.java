@@ -15,6 +15,8 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -38,6 +40,8 @@ import biz.keyinsights.sda.service.TableService;
 
 @Controller
 public class RegressionController {
+	private static final Logger LOGGER = LoggerFactory.getLogger(RegressionController.class);
+	
 	@Inject TableService tableService;
 	@Inject UserInterface userInterface;
 	
@@ -127,7 +131,7 @@ public class RegressionController {
 					while ( !userInterface.checkRegressionEnd() ) {
 						String line = userInterface.getClinetMessage();
 						if ( !StringUtils.isEmpty(line) ) {
-							System.out.println("LOGGER: " + userInterface.getClinetMessage());
+							LOGGER.info(line);
 						}
 					}
 				});

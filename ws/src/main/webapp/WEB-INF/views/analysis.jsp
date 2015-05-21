@@ -140,8 +140,18 @@ $(function() {
 				data : JSON.stringify(data),
 				success : function(response) {
 					if ( response.id ) {
-						console.log(response.log);
 						//location.href = $("body").data("page-context") + "/regression/" + response.id;
+						var content = "<div id='dialog-result' title='Regression Results'>";
+						content += response.log;
+						content += "</div>";
+						$(content).dialog({
+							modal: true,
+							buttons : {
+								"Ok" : function() {
+									$(this).dialog("close");
+								}
+							}
+						});
 					} else {
 						// turn off wait image
 						var content = "<div id='dialog-confirm' title='Further Authentication Required'>";
@@ -154,7 +164,6 @@ $(function() {
 							content += "<dt>Password:</dt><dd><input type='password' class='password'/></dd></dl></li>";
 						}
 						content += "</ul>";
-						//content += "<input id='auths' type='submit' class='btn btn-primary' value='Authenticate'/></div>";
 						$(content).dialog({resizable: false,
 							      modal: true,
 							      buttons : {
