@@ -122,19 +122,10 @@ public class RegressionController {
 				userInterface.setResponseMatrix(dependent.toMatrix());
 				userInterface.setRegressionType("linearRegression");
 				
-				ExecutorService service = Executors.newFixedThreadPool(joinerRegressions.size() + 2);
+				ExecutorService service = Executors.newFixedThreadPool(joinerRegressions.size() + 1);
 				Future<?> creator = service.submit(creatorRegression);
 				
 				joinerRegressions.forEach(r -> service.submit(r));
-				
-				service.submit(() -> {
-					while ( !userInterface.checkRegressionEnd() ) {
-						String line = userInterface.getClinetMessage();
-						if ( !StringUtils.isEmpty(line) ) {
-							LOGGER.info(line);
-						}
-					}
-				});
 				
 				// the regression code appears to be single-threaded; to keep progress from blocking, I
 				// launch a creator and joiner regression, one for the local tables and one for the remote.
