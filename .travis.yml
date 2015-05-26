@@ -1,4 +1,4 @@
 language: java
-script: mvn install -Dmaven.test.skip=true
+script: mvn install -DskipTests
 jdk:
   - oraclejdk8
