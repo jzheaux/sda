@@ -93,6 +93,11 @@ td, th {
 dt {
   float: left;
   width: 225px;
+  clear: left;
+}
+
+.form {
+  padding-bottom: 20px;
 }
 
 .join {

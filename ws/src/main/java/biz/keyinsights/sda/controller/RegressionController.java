@@ -67,25 +67,27 @@ public class RegressionController {
 			try {
 				InputStream data = service.getTableData(t.getId(), t.getUsername(), t.getPassword());
 				try ( Scanner scanner = new Scanner(data) ) {
-					/*String columnHeader =*/ scanner.nextLine();
-					int whichRow = 0;
-					while ( scanner.hasNextLine() ) {
-						String[] row = scanner.nextLine().split(",");
-						List<RegressionColumn> columns = t.getPredictors();
-						Double[] toAdd = columns.stream()
-												.map(c -> Double.parseDouble(row[c.getId()]))
-												.collect(Collectors.toList())
-												.toArray(new Double[columns.size()]);
-						predictor.addColumns(whichRow, toAdd);
-						
-						columns = t.getDependents();
-						toAdd = columns.stream()
-								.map(c -> Double.parseDouble(row[c.getId()]))
-								.collect(Collectors.toList())
-								.toArray(new Double[columns.size()]);
-						dependent.addColumns(whichRow, toAdd);
-						
-						whichRow++;
+					if ( scanner.hasNextLine() ) {
+						/*String columnHeader =*/ scanner.nextLine();
+						int whichRow = 0;
+						while ( scanner.hasNextLine() ) {
+							String[] row = scanner.nextLine().split(",");
+							List<RegressionColumn> columns = t.getPredictors();
+							Double[] toAdd = columns.stream()
+													.map(c -> Double.parseDouble(row[c.getId()]))
+													.collect(Collectors.toList())
+													.toArray(new Double[columns.size()]);
+							predictor.addColumns(whichRow, toAdd);
+							
+							columns = t.getDependents();
+							toAdd = columns.stream()
+									.map(c -> Double.parseDouble(row[c.getId()]))
+									.collect(Collectors.toList())
+									.toArray(new Double[columns.size()]);
+							dependent.addColumns(whichRow, toAdd);
+							
+							whichRow++;
+						}
 					}
 				}
 				

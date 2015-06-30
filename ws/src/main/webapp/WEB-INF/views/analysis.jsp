@@ -217,18 +217,19 @@ $(function() {
 			</ul>
 			
 			<p>Add tables from a remote server:</p>
-			<dl>
-				<dt>Host:</dt>
-				<dd><input type="text" name="host" placeholder="127.0.0.1"/></dd>
-				<dt>Port:</dt>
-				<dd><input type="text" name="port" placeholder="8080"/></dd>
-				<dt>Username:</dt>
-				<dd><input type="text" name="username" placeholder="Remote Username"/></dd>
-				<dt>Password:</dt>
-				<dd><input type="text" name="password" placeholder="Remote Password"/></dd>
-				<a href="#" id="add-remote-server" class="btn btn-primary">Add</a>			
-			</dl>
-			
+			<div class="form">
+				<dl>
+					<dt>Host:</dt>
+					<dd><input type="text" name="host" placeholder="127.0.0.1"/></dd>
+					<dt>Port:</dt>
+					<dd><input type="text" name="port" placeholder="8080"/></dd>
+					<dt>Username:</dt>
+					<dd><input type="text" name="username" placeholder="Remote Username"/></dd>
+					<dt>Password:</dt>
+					<dd><input type="text" name="password" placeholder="Remote Password"/></dd>			
+				</dl>
+				<a href="#" id="add-remote-server" class="btn btn-primary">Add</a>
+			</div>
 			<a href="#" id="begin-regression" class="btn btn-primary btn-block">Start Regression</a>
 		</section>
 	</div>
