@@ -105,6 +105,7 @@ public class JsonBasedTableService implements TableService {
 				uploadData(existing, csv);	
 			}
 			
+			existing.setColumns(t.getColumns());
 			existing.setTableName(t.getTableName());
 			existing.setAccessLimit(t.getAccessLimit());
 			existing.setJoinLimit(t.getJoinLimit());

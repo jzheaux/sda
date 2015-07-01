@@ -5,7 +5,10 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>New Table</title>
+<title>Table</title>
+
+<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 
@@ -17,7 +20,6 @@
 
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resources/style.css"/>
 
-<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
 
 <script type="text/javascript">
 	/* When column clicked, highlight it. */
