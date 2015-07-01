@@ -51,7 +51,14 @@
 			</c:otherwise>
 		</c:choose>
 		
-		<form method="post" action="${pageContext.request.contextPath}/table/${model.id}/edit" enctype="multipart/form-data">
+		<c:choose>
+			<c:when test="${empty model.id}">
+				<form method="post" action="${pageContext.request.contextPath}/table/new" enctype="multipart/form-data">
+			</c:when>
+			<c:otherwise>
+				<form method="post" action="${pageContext.request.contextPath}/table/${model.id}/edit" enctype="multipart/form-data">
+			</c:otherwise>
+		</c:choose>
 			<section>
 				<h1>Data</h1>
 				<dl>
