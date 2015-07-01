@@ -60,6 +60,10 @@ public class TableController {
 	@RequestMapping(value="/table/{id}/edit", method=RequestMethod.POST)
 	@Secured("ADMIN")
 	public String commitEditTable(@PathVariable("id") String id, @ModelAttribute("model") @Valid Table table, @RequestParam("data") MultipartFile csv)  throws IOException {
+		if ( csv.getSize() == 0 ) {
+			Table withColumns = tableService.getTable(id);
+			table.setColumns(withColumns.getColumns());
+		}
 		tableService.updateTable(table, csv.getSize() == 0 ? null : csv.getInputStream());
 
 		return "redirect:/table/" + table.getId() + "/edit";
